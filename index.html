@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Industrial IoT Control Center</title>
+  <title>Industrial IoT Dashboard</title>
 
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -15,10 +15,9 @@
       --panel2:#0f1a33;
       --text:#e5e7eb;
       --muted:#94a3b8;
-      --accent:#38bdf8;
-      --danger:#ef4444;
-      --warn:#f59e0b;
       --ok:#22c55e;
+      --warn:#f59e0b;
+      --danger:#ef4444;
       --border:rgba(255,255,255,0.08);
     }
 
@@ -31,66 +30,61 @@
       color:var(--text);
     }
 
-    /* TOP BAR */
     .topbar{
       display:flex;
       justify-content:space-between;
       align-items:center;
-      padding:16px 22px;
-      background:rgba(17,26,46,0.7);
+      padding:14px 18px;
+      background:rgba(17,26,46,0.75);
       border-bottom:1px solid var(--border);
-      backdrop-filter: blur(10px);
       position:sticky;
       top:0;
-      z-index:10;
+      z-index:5;
     }
 
     .title{
       font-weight:700;
       letter-spacing:1px;
+      font-size:14px;
     }
 
     .status-pill{
-      padding:6px 12px;
+      padding:5px 10px;
       border-radius:999px;
       font-size:12px;
       border:1px solid var(--border);
       color:var(--ok);
     }
 
-    /* LAYOUT */
     .container{
-      padding:20px;
+      padding:16px;
       display:grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap:16px;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
     }
 
     @media(max-width:900px){
       .container{grid-template-columns:1fr;}
     }
 
-    /* PANELS */
     .panel{
       background:linear-gradient(180deg,var(--panel),var(--panel2));
       border:1px solid var(--border);
-      border-radius:16px;
-      padding:16px;
-      box-shadow:0 10px 30px rgba(0,0,0,0.3);
+      border-radius:14px;
+      padding:14px;
     }
 
     .panel h3{
       margin:0 0 10px 0;
-      font-size:14px;
+      font-size:13px;
       color:var(--muted);
       letter-spacing:1px;
     }
 
-    /* GRID CARDS */
     .grid{
       display:grid;
       grid-template-columns:repeat(3,1fr);
-      gap:12px;
+      gap:10px;
     }
 
     @media(max-width:900px){
@@ -100,89 +94,51 @@
     .card{
       background:rgba(255,255,255,0.03);
       border:1px solid var(--border);
-      border-radius:14px;
-      padding:12px;
+      border-radius:12px;
+      padding:10px;
+    }
+
+    .label{
+      font-size:11px;
+      color:var(--muted);
     }
 
     .value{
-      font-size:22px;
+      font-size:20px;
       font-weight:700;
-      margin-top:6px;
+      margin-top:4px;
     }
 
-    /* CHART */
     canvas{max-height:180px;}
 
-    /* STATUS */
     .status{
-      padding:6px 10px;
+      font-size:12px;
+      padding:5px 8px;
       border-radius:8px;
       display:inline-block;
       margin-top:6px;
-      font-size:12px;
       border:1px solid var(--border);
     }
 
     .ok{color:var(--ok);}
     .warn{color:var(--warn);}
     .danger{color:var(--danger);}
-
-    /* CONTROL PANEL */
-    button{
-      background:rgba(56,189,248,0.15);
-      border:1px solid rgba(56,189,248,0.4);
-      color:var(--text);
-      padding:8px 10px;
-      border-radius:10px;
-      cursor:pointer;
-      margin:4px;
-      transition:0.2s;
-    }
-
-    button:hover{
-      background:rgba(56,189,248,0.3);
-    }
-
-    input[type=range]{width:100%;}
-
-    /* ALERT */
-    #alertBox{
-      position:fixed;
-      top:20px;
-      right:20px;
-      background:rgba(239,68,68,0.95);
-      padding:14px 16px;
-      border-radius:12px;
-      display:none;
-      box-shadow:0 10px 30px rgba(0,0,0,0.4);
-      font-weight:600;
-    }
-
-    /* SMALL LABELS */
-    .label{
-      font-size:11px;
-      color:var(--muted);
-    }
   </style>
 </head>
 
 <body>
 
 <div class="topbar">
-  <div class="title">INDUSTRIAL IoT CONTROL CENTER</div>
+  <div class="title">INDUSTRIAL IoT DASHBOARD</div>
   <div id="conn" class="status-pill">CONNECTING...</div>
 </div>
 
-<div id="alertBox"></div>
-
 <div class="container">
 
-  <!-- LEFT: MONITORING -->
   <div class="panel">
-    <h3>REALTIME MONITORING</h3>
+    <h3>MONITORING</h3>
 
     <div class="grid">
-
       <div class="card">
         <div class="label">TEMPERATURE</div>
         <div class="value" id="tval">--</div>
@@ -200,37 +156,27 @@
         <div class="value" id="gval">--</div>
         <canvas id="gasChart"></canvas>
       </div>
-
     </div>
   </div>
 
-  <!-- RIGHT: CONTROL -->
   <div class="panel">
-    <h3>CONTROL SYSTEM</h3>
+    <h3>STATUS</h3>
 
     <div class="card">
-      <div class="label">LIGHT CONTROL</div>
-      <button onclick="send('lamp','ON')">ON</button>
-      <button onclick="send('lamp','OFF')">OFF</button>
-    </div>
-
-    <div class="card">
-      <div class="label">MODE</div>
-      <button onclick="send('mode','AUTO')">AUTO</button>
-      <button onclick="send('mode','MANUAL')">MANUAL</button>
-    </div>
-
-    <div class="card">
-      <div class="label">AC CONTROL</div>
-      <input type="range" min="0" max="180" onchange="send('ac',this.value)">
-    </div>
-
-    <div class="card">
-      <div class="label">STATUS</div>
+      <div class="label">MOTION</div>
       <div id="motion" class="status">--</div>
+    </div>
+
+    <div class="card">
+      <div class="label">LIGHT</div>
       <div id="light" class="status">--</div>
+    </div>
+
+    <div class="card">
+      <div class="label">GAS ALERT</div>
       <div id="gasText" class="status">--</div>
     </div>
+
   </div>
 
 </div>
@@ -244,18 +190,7 @@ const client = mqtt.connect(broker, {
   password:"Smart123"
 });
 
-const conn = document.getElementById("conn");
-
-function alert(msg){
-  const a=document.getElementById("alertBox");
-  a.innerText=msg;
-  a.style.display="block";
-  setTimeout(()=>a.style.display="none",4000);
-}
-
-function send(type,value){
-  client.publish("smartbuilding/control",JSON.stringify({type,value}));
-}
+const conn=document.getElementById("conn");
 
 function chart(ctx,label){
   return new Chart(ctx,{type:"line",data:{labels:[],datasets:[{label,data:[],borderColor:"#38bdf8",fill:false}]},options:{responsive:true,scales:{x:{display:false}}}});
@@ -290,20 +225,18 @@ client.on("message",(_,m)=>{
   up(h,d.hum);
   up(g,d.gas);
 
-  document.getElementById("motion").innerText=d.motion?"MOTION":"CLEAR";
+  document.getElementById("motion").innerText=d.motion?"DETECTED":"CLEAR";
   document.getElementById("light").innerText=d.light;
 
   let gt="SAFE",cls="ok";
 
-  if(d.gas>3000){gt="DANGER";cls="danger";alert("GAS DANGER!");}
-  else if(d.gas>1800){gt="WARNING";cls="warn";alert("Gas Warning");}
+  if(d.gas>3000){gt="DANGER";cls="danger";}
+  else if(d.gas>1800){gt="WARNING";cls="warn";}
 
   const el=document.getElementById("gasText");
   el.innerText=gt;
   el.className="status "+cls;
 });
-
-client.on("error",e=>console.log(e));
 
 </script>
 
