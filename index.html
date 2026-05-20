@@ -5,23 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>IoT Smart Building Dashboard</title>
 
-  <!-- MQTT + Chart.js -->
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: Arial;
       background: #0f172a;
       color: white;
       margin: 0;
       padding: 20px;
     }
 
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+    h1 { text-align: center; }
 
     .grid {
       display: grid;
@@ -35,18 +31,33 @@
       border-radius: 12px;
     }
 
-    canvas {
-      max-height: 200px;
-    }
+    canvas { max-height: 200px; }
 
-    .status {
-      font-size: 18px;
-      margin-top: 10px;
-    }
-
+    .status { font-size: 18px; margin-top: 10px; }
     .ok { color: #22c55e; }
     .warn { color: #f59e0b; }
     .danger { color: #ef4444; }
+
+    button, input {
+      margin: 5px;
+      padding: 8px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+
+    button { background: #38bdf8; color: black; }
+    button:hover { opacity: 0.8; }
+
+    #alertBox {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #ef4444;
+      padding: 15px;
+      border-radius: 10px;
+      display: none;
+    }
   </style>
 </head>
 
@@ -54,15 +65,17 @@
 
 <h1>SMART BUILDING DASHBOARD</h1>
 
+<div id="alertBox"></div>
+
 <div class="grid">
 
   <div class="card">
-    <h3>Temperature (°C)</h3>
+    <h3>Temperature</h3>
     <canvas id="tempChart"></canvas>
   </div>
 
   <div class="card">
-    <h3>Humidity (%)</h3>
+    <h3>Humidity</h3>
     <canvas id="humChart"></canvas>
   </div>
 
@@ -72,21 +85,34 @@
   </div>
 
   <div class="card">
-    <h3>Motion Status</h3>
+    <h3>Status</h3>
     <div id="motion" class="status">--</div>
-
-    <h3>Light Status</h3>
     <div id="light" class="status">--</div>
-
-    <h3>Gas Alert</h3>
     <div id="gasText" class="status">--</div>
+  </div>
+
+  <!-- CONTROL UI -->
+  <div class="card">
+    <h3>Control Panel</h3>
+
+    <button onclick="sendCommand('lamp','ON')">Lamp ON</button>
+    <button onclick="sendCommand('lamp','OFF')">Lamp OFF</button>
+
+    <br/>
+
+    <button onclick="sendCommand('mode','AUTO')">AUTO MODE</button>
+    <button onclick="sendCommand('mode','MANUAL')">MANUAL MODE</button>
+
+    <br/>
+
+    <label>AC Control</label>
+    <input type="range" min="0" max="180" onchange="sendCommand('ac', this.value)">
   </div>
 
 </div>
 
 <script>
 
-// ================= MQTT CONFIG =================
 const broker = "wss://building-iot-9ee940c9.a03.euc1.aws.hivemq.cloud:8884/mqtt";
 
 const client = mqtt.connect(broker, {
@@ -94,41 +120,25 @@ const client = mqtt.connect(broker, {
   password: "Smart123"
 });
 
-// ================= CHART SETUP =================
-const maxData = 20;
-
+// CHART
 function createChart(ctx, label) {
   return new Chart(ctx, {
     type: 'line',
-    data: {
-      labels: [],
-      datasets: [{
-        label: label,
-        data: [],
-        borderColor: '#38bdf8',
-        fill: false
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        x: { display: false }
-      }
-    }
+    data: { labels: [], datasets: [{ label, data: [], borderColor: '#38bdf8', fill: false }] },
+    options: { responsive: true, scales: { x: { display: false } } }
   });
 }
 
-const tempChart = createChart(document.getElementById('tempChart'), 'Temperature');
+const tempChart = createChart(document.getElementById('tempChart'), 'Temp');
 const humChart = createChart(document.getElementById('humChart'), 'Humidity');
 const gasChart = createChart(document.getElementById('gasChart'), 'Gas');
 
 function updateChart(chart, value) {
-  const time = new Date().toLocaleTimeString();
-
-  chart.data.labels.push(time);
+  const t = new Date().toLocaleTimeString();
+  chart.data.labels.push(t);
   chart.data.datasets[0].data.push(value);
 
-  if (chart.data.labels.length > maxData) {
+  if (chart.data.labels.length > 20) {
     chart.data.labels.shift();
     chart.data.datasets[0].data.shift();
   }
@@ -136,7 +146,24 @@ function updateChart(chart, value) {
   chart.update();
 }
 
-// ================= MQTT =================
+// ALERT
+function showAlert(msg) {
+  const box = document.getElementById('alertBox');
+  box.innerText = msg;
+  box.style.display = 'block';
+
+  setTimeout(() => box.style.display = 'none', 4000);
+}
+
+// CONTROL
+function sendCommand(type, value) {
+  const topic = "smartbuilding/control";
+  const msg = JSON.stringify({ type, value });
+
+  client.publish(topic, msg);
+  console.log("Sent:", msg);
+}
+
 client.on('connect', () => {
   console.log('MQTT Connected');
   client.subscribe('smartbuilding/sensor');
@@ -146,38 +173,32 @@ client.on('message', (topic, message) => {
 
   const data = JSON.parse(message.toString());
 
-  // Charts
   updateChart(tempChart, data.temp);
   updateChart(humChart, data.hum);
   updateChart(gasChart, data.gas);
 
-  // Motion
-  document.getElementById('motion').innerText = data.motion ? 'DETECTED' : 'NO MOTION';
-
-  // Light
+  document.getElementById('motion').innerText = data.motion ? 'MOTION DETECTED' : 'NO MOTION';
   document.getElementById('light').innerText = data.light;
 
-  // Gas status
   let gasText = 'SAFE';
   let gasClass = 'ok';
 
   if (data.gas > 3000) {
     gasText = 'DANGER';
     gasClass = 'danger';
+    showAlert('⚠ GAS DANGER! EVACUATE!');
   } else if (data.gas > 1800) {
     gasText = 'WARNING';
     gasClass = 'warn';
+    showAlert('⚠ Gas Warning Level');
   }
 
   const gasEl = document.getElementById('gasText');
   gasEl.innerText = gasText;
   gasEl.className = 'status ' + gasClass;
-
 });
 
-client.on('error', (err) => {
-  console.log('MQTT Error:', err);
-});
+client.on('error', (err) => console.log(err));
 
 </script>
 
