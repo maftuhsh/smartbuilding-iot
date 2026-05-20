@@ -3,110 +3,234 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IoT Smart Building Dashboard</title>
+  <title>Industrial IoT Control Center</title>
 
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    body {
-      font-family: Arial;
-      background: #0f172a;
-      color: white;
-      margin: 0;
-      padding: 20px;
+    :root{
+      --bg:#0b1220;
+      --panel:#111a2e;
+      --panel2:#0f1a33;
+      --text:#e5e7eb;
+      --muted:#94a3b8;
+      --accent:#38bdf8;
+      --danger:#ef4444;
+      --warn:#f59e0b;
+      --ok:#22c55e;
+      --border:rgba(255,255,255,0.08);
     }
 
-    h1 { text-align: center; }
+    *{box-sizing:border-box;}
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 15px;
+    body{
+      margin:0;
+      font-family:system-ui,Arial;
+      background:radial-gradient(circle at top,#0f172a,#050814);
+      color:var(--text);
     }
 
-    .card {
-      background: #1e293b;
-      padding: 15px;
-      border-radius: 12px;
+    /* TOP BAR */
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:16px 22px;
+      background:rgba(17,26,46,0.7);
+      border-bottom:1px solid var(--border);
+      backdrop-filter: blur(10px);
+      position:sticky;
+      top:0;
+      z-index:10;
     }
 
-    canvas { max-height: 200px; }
-
-    .status { font-size: 18px; margin-top: 10px; }
-    .ok { color: #22c55e; }
-    .warn { color: #f59e0b; }
-    .danger { color: #ef4444; }
-
-    button, input {
-      margin: 5px;
-      padding: 8px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
+    .title{
+      font-weight:700;
+      letter-spacing:1px;
     }
 
-    button { background: #38bdf8; color: black; }
-    button:hover { opacity: 0.8; }
+    .status-pill{
+      padding:6px 12px;
+      border-radius:999px;
+      font-size:12px;
+      border:1px solid var(--border);
+      color:var(--ok);
+    }
 
-    #alertBox {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #ef4444;
-      padding: 15px;
-      border-radius: 10px;
-      display: none;
+    /* LAYOUT */
+    .container{
+      padding:20px;
+      display:grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap:16px;
+    }
+
+    @media(max-width:900px){
+      .container{grid-template-columns:1fr;}
+    }
+
+    /* PANELS */
+    .panel{
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:16px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .panel h3{
+      margin:0 0 10px 0;
+      font-size:14px;
+      color:var(--muted);
+      letter-spacing:1px;
+    }
+
+    /* GRID CARDS */
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+    }
+
+    @media(max-width:900px){
+      .grid{grid-template-columns:1fr;}
+    }
+
+    .card{
+      background:rgba(255,255,255,0.03);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px;
+    }
+
+    .value{
+      font-size:22px;
+      font-weight:700;
+      margin-top:6px;
+    }
+
+    /* CHART */
+    canvas{max-height:180px;}
+
+    /* STATUS */
+    .status{
+      padding:6px 10px;
+      border-radius:8px;
+      display:inline-block;
+      margin-top:6px;
+      font-size:12px;
+      border:1px solid var(--border);
+    }
+
+    .ok{color:var(--ok);}
+    .warn{color:var(--warn);}
+    .danger{color:var(--danger);}
+
+    /* CONTROL PANEL */
+    button{
+      background:rgba(56,189,248,0.15);
+      border:1px solid rgba(56,189,248,0.4);
+      color:var(--text);
+      padding:8px 10px;
+      border-radius:10px;
+      cursor:pointer;
+      margin:4px;
+      transition:0.2s;
+    }
+
+    button:hover{
+      background:rgba(56,189,248,0.3);
+    }
+
+    input[type=range]{width:100%;}
+
+    /* ALERT */
+    #alertBox{
+      position:fixed;
+      top:20px;
+      right:20px;
+      background:rgba(239,68,68,0.95);
+      padding:14px 16px;
+      border-radius:12px;
+      display:none;
+      box-shadow:0 10px 30px rgba(0,0,0,0.4);
+      font-weight:600;
+    }
+
+    /* SMALL LABELS */
+    .label{
+      font-size:11px;
+      color:var(--muted);
     }
   </style>
 </head>
 
 <body>
 
-<h1>SMART BUILDING DASHBOARD</h1>
+<div class="topbar">
+  <div class="title">INDUSTRIAL IoT CONTROL CENTER</div>
+  <div id="conn" class="status-pill">CONNECTING...</div>
+</div>
 
 <div id="alertBox"></div>
 
-<div class="grid">
+<div class="container">
 
-  <div class="card">
-    <h3>Temperature</h3>
-    <canvas id="tempChart"></canvas>
+  <!-- LEFT: MONITORING -->
+  <div class="panel">
+    <h3>REALTIME MONITORING</h3>
+
+    <div class="grid">
+
+      <div class="card">
+        <div class="label">TEMPERATURE</div>
+        <div class="value" id="tval">--</div>
+        <canvas id="tempChart"></canvas>
+      </div>
+
+      <div class="card">
+        <div class="label">HUMIDITY</div>
+        <div class="value" id="hval">--</div>
+        <canvas id="humChart"></canvas>
+      </div>
+
+      <div class="card">
+        <div class="label">GAS</div>
+        <div class="value" id="gval">--</div>
+        <canvas id="gasChart"></canvas>
+      </div>
+
+    </div>
   </div>
 
-  <div class="card">
-    <h3>Humidity</h3>
-    <canvas id="humChart"></canvas>
-  </div>
+  <!-- RIGHT: CONTROL -->
+  <div class="panel">
+    <h3>CONTROL SYSTEM</h3>
 
-  <div class="card">
-    <h3>Gas Level</h3>
-    <canvas id="gasChart"></canvas>
-  </div>
+    <div class="card">
+      <div class="label">LIGHT CONTROL</div>
+      <button onclick="send('lamp','ON')">ON</button>
+      <button onclick="send('lamp','OFF')">OFF</button>
+    </div>
 
-  <div class="card">
-    <h3>Status</h3>
-    <div id="motion" class="status">--</div>
-    <div id="light" class="status">--</div>
-    <div id="gasText" class="status">--</div>
-  </div>
+    <div class="card">
+      <div class="label">MODE</div>
+      <button onclick="send('mode','AUTO')">AUTO</button>
+      <button onclick="send('mode','MANUAL')">MANUAL</button>
+    </div>
 
-  <!-- CONTROL UI -->
-  <div class="card">
-    <h3>Control Panel</h3>
+    <div class="card">
+      <div class="label">AC CONTROL</div>
+      <input type="range" min="0" max="180" onchange="send('ac',this.value)">
+    </div>
 
-    <button onclick="sendCommand('lamp','ON')">Lamp ON</button>
-    <button onclick="sendCommand('lamp','OFF')">Lamp OFF</button>
-
-    <br/>
-
-    <button onclick="sendCommand('mode','AUTO')">AUTO MODE</button>
-    <button onclick="sendCommand('mode','MANUAL')">MANUAL MODE</button>
-
-    <br/>
-
-    <label>AC Control</label>
-    <input type="range" min="0" max="180" onchange="sendCommand('ac', this.value)">
+    <div class="card">
+      <div class="label">STATUS</div>
+      <div id="motion" class="status">--</div>
+      <div id="light" class="status">--</div>
+      <div id="gasText" class="status">--</div>
+    </div>
   </div>
 
 </div>
@@ -116,89 +240,70 @@
 const broker = "wss://building-iot-9ee940c9.a03.euc1.aws.hivemq.cloud:8884/mqtt";
 
 const client = mqtt.connect(broker, {
-  username: "smartbuilding",
-  password: "Smart123"
+  username:"smartbuilding",
+  password:"Smart123"
 });
 
-// CHART
-function createChart(ctx, label) {
-  return new Chart(ctx, {
-    type: 'line',
-    data: { labels: [], datasets: [{ label, data: [], borderColor: '#38bdf8', fill: false }] },
-    options: { responsive: true, scales: { x: { display: false } } }
-  });
+const conn = document.getElementById("conn");
+
+function alert(msg){
+  const a=document.getElementById("alertBox");
+  a.innerText=msg;
+  a.style.display="block";
+  setTimeout(()=>a.style.display="none",4000);
 }
 
-const tempChart = createChart(document.getElementById('tempChart'), 'Temp');
-const humChart = createChart(document.getElementById('humChart'), 'Humidity');
-const gasChart = createChart(document.getElementById('gasChart'), 'Gas');
-
-function updateChart(chart, value) {
-  const t = new Date().toLocaleTimeString();
-  chart.data.labels.push(t);
-  chart.data.datasets[0].data.push(value);
-
-  if (chart.data.labels.length > 20) {
-    chart.data.labels.shift();
-    chart.data.datasets[0].data.shift();
-  }
-
-  chart.update();
+function send(type,value){
+  client.publish("smartbuilding/control",JSON.stringify({type,value}));
 }
 
-// ALERT
-function showAlert(msg) {
-  const box = document.getElementById('alertBox');
-  box.innerText = msg;
-  box.style.display = 'block';
-
-  setTimeout(() => box.style.display = 'none', 4000);
+function chart(ctx,label){
+  return new Chart(ctx,{type:"line",data:{labels:[],datasets:[{label,data:[],borderColor:"#38bdf8",fill:false}]},options:{responsive:true,scales:{x:{display:false}}}});
 }
 
-// CONTROL
-function sendCommand(type, value) {
-  const topic = "smartbuilding/control";
-  const msg = JSON.stringify({ type, value });
+const t=chart(document.getElementById("tempChart"),"T");
+const h=chart(document.getElementById("humChart"),"H");
+const g=chart(document.getElementById("gasChart"),"G");
 
-  client.publish(topic, msg);
-  console.log("Sent:", msg);
+function up(c,v){
+  const time=new Date().toLocaleTimeString();
+  c.data.labels.push(time);
+  c.data.datasets[0].data.push(v);
+  if(c.data.labels.length>20){c.data.labels.shift();c.data.datasets[0].data.shift();}
+  c.update();
 }
 
-client.on('connect', () => {
-  console.log('MQTT Connected');
-  client.subscribe('smartbuilding/sensor');
+client.on("connect",()=>{
+  conn.innerText="ONLINE";
+  conn.style.color="#22c55e";
+  client.subscribe("smartbuilding/sensor");
 });
 
-client.on('message', (topic, message) => {
+client.on("message",(_,m)=>{
+  const d=JSON.parse(m.toString());
 
-  const data = JSON.parse(message.toString());
+  document.getElementById("tval").innerText=d.temp+"°C";
+  document.getElementById("hval").innerText=d.hum+"%";
+  document.getElementById("gval").innerText=d.gas;
 
-  updateChart(tempChart, data.temp);
-  updateChart(humChart, data.hum);
-  updateChart(gasChart, data.gas);
+  up(t,d.temp);
+  up(h,d.hum);
+  up(g,d.gas);
 
-  document.getElementById('motion').innerText = data.motion ? 'MOTION DETECTED' : 'NO MOTION';
-  document.getElementById('light').innerText = data.light;
+  document.getElementById("motion").innerText=d.motion?"MOTION":"CLEAR";
+  document.getElementById("light").innerText=d.light;
 
-  let gasText = 'SAFE';
-  let gasClass = 'ok';
+  let gt="SAFE",cls="ok";
 
-  if (data.gas > 3000) {
-    gasText = 'DANGER';
-    gasClass = 'danger';
-    showAlert('⚠ GAS DANGER! EVACUATE!');
-  } else if (data.gas > 1800) {
-    gasText = 'WARNING';
-    gasClass = 'warn';
-    showAlert('⚠ Gas Warning Level');
-  }
+  if(d.gas>3000){gt="DANGER";cls="danger";alert("GAS DANGER!");}
+  else if(d.gas>1800){gt="WARNING";cls="warn";alert("Gas Warning");}
 
-  const gasEl = document.getElementById('gasText');
-  gasEl.innerText = gasText;
-  gasEl.className = 'status ' + gasClass;
+  const el=document.getElementById("gasText");
+  el.innerText=gt;
+  el.className="status "+cls;
 });
 
-client.on('error', (err) => console.log(err));
+client.on("error",e=>console.log(e));
 
 </script>
 
