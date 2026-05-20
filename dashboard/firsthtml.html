@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IoT Smart Building Dashboard</title>
+
+  <!-- MQTT.js -->
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .card {
+      background: #1e293b;
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .value {
+      font-size: 28px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .status {
+      font-size: 20px;
+      margin-top: 10px;
+    }
+
+    .ok { color: #22c55e; }
+    .warn { color: #f59e0b; }
+    .danger { color: #ef4444; }
+  </style>
+</head>
+
+<body>
+
+<h1>SMART BUILDING DASHBOARD</h1>
+
+<div class="grid">
+  <div class="card">
+    <h3>Temperature</h3>
+    <div class="value" id="temp">--</div>
+  </div>
+
+  <div class="card">
+    <h3>Humidity</h3>
+    <div class="value" id="hum">--</div>
+  </div>
+
+  <div class="card">
+    <h3>Motion</h3>
+    <div class="status" id="motion">--</div>
+  </div>
+
+  <div class="card">
+    <h3>Light</h3>
+    <div class="status" id="light">--</div>
+  </div>
+
+  <div class="card">
+    <h3>Gas Level</h3>
+    <div class="status" id="gas">--</div>
+  </div>
+</div>
+
+<script>
+
+// ===============================
+// MQTT CONFIG (EDIT THIS)
+// ===============================
+const broker = "wss://building-iot-9ee940c9.a03.euc1.aws.hivemq.cloud:8884/mqtt";
+
+const options = {
+  username: "smartbuilding",
+  password: "Smart123",
+  clean: true,
+  connectTimeout: 4000
+};
+
+// Connect
+const client = mqtt.connect(broker, options);
+
+client.on("connect", () => {
+  console.log("Connected to MQTT");
+  client.subscribe("smartbuilding/sensor");
+});
+
+client.on("message", (topic, message) => {
+
+  const data = JSON.parse(message.toString());
+
+  // Update UI
+  document.getElementById("temp").innerText = data.temp + " °C";
+  document.getElementById("hum").innerText = data.hum + " %";
+
+  // Motion
+  document.getElementById("motion").innerText = data.motion ? "DETECTED" : "NO MOTION";
+
+  // Light
+  document.getElementById("light").innerText = data.light;
+
+  // Gas
+  let gasText = "SAFE";
+  let gasClass = "ok";
+
+  if (data.gas > 3000) {
+    gasText = "DANGER";
+    gasClass = "danger";
+  } else if (data.gas > 1800) {
+    gasText = "WARNING";
+    gasClass = "warn";
+  }
+
+  const gasEl = document.getElementById("gas");
+  gasEl.innerText = gasText;
+  gasEl.className = "status " + gasClass;
+
+});
+
+client.on("error", (err) => {
+  console.log("MQTT Error:", err);
+});
+
+</script>
+
+</body>
+</html>
