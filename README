@@ -1,0 +1,143 @@
+
+This directory is intended for PlatformIO Test Runner and project tests.
+
+Unit Testing is a software testing method by which individual units of
+source code, sets of one or more MCU program modules together with associated
+control data, usage procedures, and operating procedures, are tested to
+determine whether they are fit for use. Unit testing finds problems early
+in the development cycle.
+
+More information about PlatformIO Unit Testing:
+- https://docs.platformio.org/en/latest/advanced/unit-testing/index.html
+
+## Judul Project
+### “Implementasi Sistem Smart Building Berbasis IoT untuk Monitoring, Efisiensi Energi, dan Keamanan Ruangan”
+
+## Konsep Sistem
+Project ini adalah sistem smart building yang mampu:
+memonitor kondisi ruangan realtime
+menghemat energi otomatis
+mendeteksi kondisi berbahaya
+mengontrol perangkat dari jarak jauh
+menampilkan dashboard monitoring berbasis web
+
+## STACK SISTEM
+1. Embedded System Layer
+    Esp 32 Controler
+2. Sensor Layer
+    DHT 22
+    PIR Motion Sensor
+    LDR Sensor
+    MQ-2 Smoke/Gas Sensor
+3. Aktuator Layer
+    A. Relay Modul
+    B. DC fan 
+    C. Servo Motor
+    D. Buzzer
+4. Communication Layer
+    MQTT PROTOCOL 
+        HiveMQ Public Broker
+        atau:
+        EMQX Public MQTT
+5. Cloud / Database Layer
+    Firebase Realtime Database
+6. Dashboard Layer
+    Custum dasboard usingg github Pages / blynk
+
+
+## Feature:
+Teknologi Dashboard
+    Frontend
+        HTML
+        CSS
+        JavaScript
+    Visualisasi Data
+        Chart.js
+
+    Untuk:
+        grafik realtime
+        histori suhu
+        konsumsi energi
+    Fitur Dashboard
+    Monitoring Realtime
+        suhu
+        kelembapan
+        cahaya
+        asap
+        status ruangan
+    Device Control
+        lampu
+        fan
+        mode auto/manual
+
+
+    System Status:
+        ONLINE
+        OFFLINE
+        ALERT
+        ECO MODE
+
+7. Automation Layer
+    Rule Automation
+        Efisiensi Energi
+            Jika ruangan kosong
+            → lampu OFF
+            → fan LOW POWER
+        Smart Lighting
+            Jika cahaya rendah dan ada orang
+            → lampu ON
+        Smart Cooling
+            Jika suhu > 30°C
+            → fan ON
+        Safety System
+            Jika asap terdeteksi
+            → buzzer ON
+            → dashboard ALERT
+
+Struktur Repository GitHub
+smartbuilding-iot/
+│
+├── wokwi/
+├── esp32-code/
+├── dashboard/
+├── docs/
+├── assets/
+├── README.md
+└── architecture-diagram.png
+
+Isi README yang Bikin Portfolio Kuat
+Harus ada:
+    deskripsi project
+    fitur
+    arsitektur sistem
+    list sensor
+    dashboard screenshot
+    link Wokwi
+    flowchart
+    teknologi yang digunakan
+
+Teknologi yang Bisa Kamu Tulis di CV
+
+Kalau project ini jadi, kamu bisa tulis:
+    ESP32
+    MQTT
+    Firebase
+    IoT Architecture
+    Web Dashboard
+    Realtime Monitoring
+    Embedded System
+    Automation System
+    Sensor Integration
+
+
+Smart Building IoT System
+Fitur:
+Smart Lighting
+Smart Cooling
+Smoke Detection
+Motion Detection
+OLED Monitoring
+MQTT Communication
+Realtime Dashboard
+Automation Mode
+Energy Saving Mode

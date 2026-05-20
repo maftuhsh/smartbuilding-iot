@@ -1,0 +1,425 @@
+# ROADMAP PROJECT PBL IoT
+
+## Smart Building Berbasis IoT untuk Monitoring, Efisiensi Energi, dan Keamanan Ruangan
+
+---
+
+# TUJUAN PROJECT
+
+Membuat sistem Smart Building berbasis IoT yang mampu:
+
+* Monitoring kondisi ruangan secara realtime
+* Menghemat energi secara otomatis
+* Mendeteksi kondisi berbahaya
+* Mengontrol perangkat dari jarak jauh
+* Menampilkan dashboard online yang dapat diakses dari mana saja
+
+---
+
+# FITUR UTAMA SISTEM
+
+## Monitoring
+
+* Suhu ruangan
+* Kelembapan ruangan
+* Intensitas cahaya
+* Deteksi asap/gas
+* Deteksi keberadaan manusia
+
+## Automation
+
+* Lampu otomatis
+* Fan otomatis
+* Alarm asap/gas
+* Eco mode hemat energi
+
+## Dashboard
+
+* Monitoring realtime
+* Grafik data sensor
+* Kontrol perangkat
+* Mode auto/manual
+
+---
+
+# KOMPONEN YANG DIGUNAKAN
+
+## Mikrokontroler
+
+* ESP32
+
+## Sensor
+
+* DHT22 (suhu & kelembapan)
+* PIR Motion Sensor
+* LDR Sensor
+* MQ2 Smoke/Gas Sensor
+
+## Actuator
+
+* Relay Module
+* Fan DC
+* Servo Motor
+* Buzzer
+
+## Communication
+
+* MQTT Protocol
+* HiveMQ Broker
+
+## Cloud Database
+
+* Firebase Realtime Database
+
+## Dashboard
+
+* HTML
+* CSS
+* JavaScript
+* Chart.js
+* GitHub Pages
+
+---
+
+# ROADMAP PENGERJAAN PROJECT
+
+---
+
+# PHASE 1 — MENENTUKAN KONSEP SISTEM
+
+## Tujuan
+
+Menentukan fitur dan cara kerja sistem sebelum mulai coding.
+
+## Yang Dikerjakan
+
+* Menentukan fitur utama project
+* Menentukan sensor dan actuator
+* Menentukan automation logic
+* Menentukan alur kerja sistem
+
+## Output
+
+* Konsep project final
+* Daftar fitur sistem
+* Flow sistem dasar
+
+---
+
+# PHASE 2 — MEMBUAT ARSITEKTUR SISTEM
+
+## Tujuan
+
+Membuat struktur sistem agar project terlihat rapi dan profesional.
+
+## Yang Dikerjakan
+
+Membuat diagram sistem:
+
+Sensor
+↓
+ESP32
+↓ WiFi
+MQTT / Firebase
+↓
+Dashboard Web
+↓
+Monitoring & Control
+
+## Tools
+
+* draw.io
+* Canva
+* PowerPoint
+
+## Output
+
+* Diagram arsitektur sistem
+* Diagram alur data
+
+---
+
+# PHASE 3 — MEMBUAT SIMULASI WOKWI
+
+## Tujuan
+
+Membangun sistem dasar dan automation logic.
+
+---
+
+## STEP 1 — Setup ESP32
+
+### Yang Dikerjakan
+
+* Menambahkan ESP32 di Wokwi
+* Menghubungkan ESP32 ke WiFi
+* Testing Serial Monitor
+
+### Output
+
+ESP32 berhasil terkoneksi WiFi.
+
+---
+
+## STEP 2 — Menambahkan Sensor Satu per Satu
+
+### Urutan Sensor
+
+1. DHT22
+2. LDR
+3. PIR Motion Sensor
+4. MQ2 Smoke Sensor
+
+### Yang Dikerjakan
+
+* Membaca data sensor
+* Testing sensor
+* Kalibrasi nilai sensor
+
+### Output
+
+Semua sensor dapat dibaca ESP32.
+
+---
+
+## STEP 3 — Menambahkan Actuator
+
+### Urutan
+
+1. Relay Lamp
+2. Fan
+3. Servo
+4. Buzzer
+
+### Yang Dikerjakan
+
+* Testing ON/OFF actuator
+* Menghubungkan actuator dengan sensor
+
+### Output
+
+Actuator dapat dikontrol ESP32.
+
+---
+
+## STEP 4 — Membuat Automation Logic
+
+### Contoh Logic
+
+IF suhu > 30°C
+→ fan ON
+
+IF cahaya rendah dan ada orang
+→ lampu ON
+
+IF tidak ada orang
+→ lampu OFF
+
+IF asap terdeteksi
+→ buzzer ON
+
+### Output
+
+Sistem otomatis berjalan dengan baik.
+
+---
+
+# PHASE 4 — INTEGRASI MQTT
+
+## Tujuan
+
+Mengirim data sensor secara realtime.
+
+## Yang Dikerjakan
+
+* ESP32 publish data MQTT
+* Membuat topic MQTT
+* Testing komunikasi realtime
+
+## Contoh Topic MQTT
+
+smartbuilding/temperature
+smartbuilding/humidity
+smartbuilding/motion
+smartbuilding/smoke
+smartbuilding/device
+
+## Tools
+
+* HiveMQ Broker
+* MQTT Explorer
+
+## Output
+
+Data sensor berhasil dikirim realtime.
+
+---
+
+# PHASE 5 — FIREBASE REALTIME DATABASE
+
+## Tujuan
+
+Menyimpan data sensor di cloud.
+
+## Yang Dikerjakan
+
+* Membuat Firebase Project
+* Menghubungkan ESP32 ke Firebase
+* Mengirim data sensor ke database
+
+## Contoh Data
+
+{
+"temperature": 29,
+"humidity": 70,
+"motion": true,
+"smoke": false
+}
+
+## Output
+
+Data sensor tersimpan realtime di cloud.
+
+---
+
+# PHASE 6 — MEMBUAT DASHBOARD WEBSITE
+
+## Tujuan
+
+Membuat monitoring online yang dapat diakses dari mana saja.
+
+## Teknologi
+
+* HTML
+* CSS
+* JavaScript
+* Chart.js
+
+## Fitur Dashboard
+
+### Monitoring Realtime
+
+* Suhu
+* Kelembapan
+* Cahaya
+* Motion
+* Smoke
+
+### Device Control
+
+* Lampu
+* Fan
+* Mode Auto/Manual
+
+### Grafik Realtime
+
+* Grafik suhu
+* Grafik kelembapan
+
+### System Status
+
+* ONLINE
+* OFFLINE
+* ECO MODE
+* ALERT
+
+## Hosting
+
+* GitHub Pages
+
+## Output
+
+Dashboard online berhasil berjalan.
+
+---
+
+# PHASE 7 — FINISHING PROJECT
+
+## Tujuan
+
+Merapikan project agar layak dijadikan portfolio.
+
+## Yang Dikerjakan
+
+### 1. Merapikan Wokwi
+
+* Wire rapi
+* Label pin
+* Layout bersih
+
+### 2. Screenshot Dashboard
+
+* Monitoring
+* Grafik
+* Automation
+
+### 3. Membuat README GitHub
+
+Isi:
+
+* Deskripsi project
+* Fitur sistem
+* Arsitektur
+* Komponen
+* Screenshot
+* Link Wokwi
+
+### 4. Membuat PPT Presentasi
+
+* Latar belakang
+* Tujuan
+* Cara kerja
+* Diagram sistem
+* Hasil simulasi
+
+## Output
+
+Project siap presentasi dan portfolio.
+
+---
+
+# PRIORITAS PENGERJAAN
+
+1. Konsep & fitur sistem
+2. Arsitektur sistem
+3. Wokwi & automation logic
+4. MQTT communication
+5. Firebase database
+6. Dashboard website
+7. Finishing portfolio
+
+---
+
+# NAMA REPOSITORY GITHUB
+
+## Rekomendasi Utama
+
+smartbuilding-iot
+
+## Alternatif
+
+* smartroom-iot
+* iot-energy-monitor
+* smartbuilding-control
+* esp32-smartbuilding
+
+---
+
+# KESIMPULAN
+
+Project ini bukan hanya monitoring sensor biasa, tetapi sebuah sistem Smart Building berbasis IoT yang memiliki:
+
+* Realtime monitoring
+* Automation system
+* Cloud integration
+* Dashboard online
+* Energy efficiency system
+* Safety system
+
+Sehingga project sangat cocok digunakan untuk:
+
+* Tugas PBL
+* Portfolio mahasiswa
+* GitHub showcase
+* Persiapan magang atau lomba IoT
+* Pengembangan menuju skripsi

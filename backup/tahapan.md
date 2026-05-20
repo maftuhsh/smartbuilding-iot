@@ -1,0 +1,9 @@
+| Tahap | Nama                   |
+| ----- | ---------------------- |
+| 01    | wifi_test              |
+| 02    | sensor_test            |
+| 03    | actuator_test          |
+| 04    | automation_logic       |
+| 05    | mqtt_system            |
+| 06    | system_monitoring_base |
+| 07    | smartbuilding_final    |
