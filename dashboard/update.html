@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Building Dashboard</title>
+
+  <!-- MQTT -->
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+      font-family: 'Segoe UI', sans-serif;
+      background:#f4f7fb;
+      color:#1e293b;
+      padding:30px;
+    }
+
+    /* HEADER */
+    .header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:25px;
+    }
+
+    .header h1{
+      font-size:32px;
+      font-weight:700;
+    }
+
+    .status-online{
+      background:#dcfce7;
+      color:#166534;
+      padding:10px 18px;
+      border-radius:30px;
+      font-weight:600;
+      font-size:14px;
+    }
+
+    /* GRID */
+    .dashboard{
+      display:grid;
+      grid-template-columns: 2fr 1fr;
+      gap:20px;
+    }
+
+    @media(max-width:1100px){
+      .dashboard{
+        grid-template-columns:1fr;
+      }
+    }
+
+    /* LEFT SIDE */
+    .charts{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:20px;
+    }
+
+    @media(max-width:800px){
+      .charts{
+        grid-template-columns:1fr;
+      }
+    }
+
+    /* CARD */
+    .card{
+      background:white;
+      border-radius:20px;
+      padding:20px;
+      box-shadow:0 8px 25px rgba(0,0,0,0.06);
+      border:1px solid #e2e8f0;
+    }
+
+    .card-title{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:15px;
+    }
+
+    .card-title h3{
+      font-size:16px;
+      font-weight:600;
+      color:#334155;
+    }
+
+    .value{
+      font-size:28px;
+      font-weight:700;
+      margin-bottom:10px;
+    }
+
+    /* STATUS PANEL */
+    .status-panel{
+      display:flex;
+      flex-direction:column;
+      gap:20px;
+    }
+
+    .status-box{
+      background:white;
+      border-radius:20px;
+      padding:20px;
+      box-shadow:0 8px 25px rgba(0,0,0,0.06);
+      border:1px solid #e2e8f0;
+    }
+
+    .status-label{
+      font-size:14px;
+      color:#64748b;
+      margin-bottom:10px;
+    }
+
+    .status-value{
+      font-size:24px;
+      font-weight:700;
+    }
+
+    /* COLORS */
+    .safe{
+      color:#16a34a;
+    }
+
+    .warning{
+      color:#f59e0b;
+    }
+
+    .danger{
+      color:#dc2626;
+    }
+
+    .motion{
+      color:#2563eb;
+    }
+
+    .light{
+      color:#7c3aed;
+    }
+
+    canvas{
+      max-height:260px;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>Smart Building Dashboard</h1>
+    <div class="status-online" id="mqttStatus">
+      CONNECTING...
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="dashboard">
+
+    <!-- LEFT -->
+    <div class="charts">
+
+      <!-- TEMP -->
+      <div class="card">
+        <div class="card-title">
+          <h3>Temperature</h3>
+        </div>
+
+        <div class="value" id="tempValue">-- °C</div>
+
+        <canvas id="tempChart"></canvas>
+      </div>
+
+      <!-- HUM -->
+      <div class="card">
+        <div class="card-title">
+          <h3>Humidity</h3>
+        </div>
+
+        <div class="value" id="humValue">-- %</div>
+
+        <canvas id="humChart"></canvas>
+      </div>
+
+      <!-- GAS -->
+      <div class="card">
+        <div class="card-title">
+          <h3>Gas Level</h3>
+        </div>
+
+        <div class="value" id="gasValue">--</div>
+
+        <canvas id="gasChart"></canvas>
+      </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="status-panel">
+
+      <!-- MOTION -->
+      <div class="status-box">
+        <div class="status-label">
+          Motion Sensor
+        </div>
+
+        <div id="motionStatus" class="status-value motion">
+          --
+        </div>
+      </div>
+
+      <!-- LIGHT -->
+      <div class="status-box">
+        <div class="status-label">
+          Light Sensor
+        </div>
+
+        <div id="lightStatus" class="status-value light">
+          --
+        </div>
+      </div>
+
+      <!-- GAS ALERT -->
+      <div class="status-box">
+        <div class="status-label">
+          Gas Status
+        </div>
+
+        <div id="gasStatus" class="status-value safe">
+          SAFE
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+<script>
+
+// ================= MQTT =================
+
+const broker =
+"wss://building-iot-9ee940c9.a03.euc1.aws.hivemq.cloud:8884/mqtt";
+
+const client = mqtt.connect(broker, {
+  username: "smartbuilding",
+  password: "Smart123"
+});
+
+// ================= CHART STYLE =================
+
+const chartStyle = {
+  responsive: true,
+  plugins: {
+    legend: {
+      display: false
+    }
+  },
+  scales: {
+    x: {
+      display: false,
+      grid: {
+        display: false
+      }
+    },
+    y: {
+      grid: {
+        color: "#e2e8f0"
+      }
+    }
+  },
+  tension: 0.4
+};
+
+// ================= CREATE CHART =================
+
+function createChart(ctx, color){
+
+  return new Chart(ctx, {
+
+    type: 'line',
+
+    data: {
+      labels: [],
+      datasets: [{
+        data: [],
+        borderColor: color,
+        backgroundColor: color + "20",
+        fill: true,
+        borderWidth: 3,
+        pointRadius: 0
+      }]
+    },
+
+    options: chartStyle
+  });
+}
+
+// ================= CHARTS =================
+
+const tempChart = createChart(
+  document.getElementById("tempChart"),
+  "#2563eb"
+);
+
+const humChart = createChart(
+  document.getElementById("humChart"),
+  "#06b6d4"
+);
+
+const gasChart = createChart(
+  document.getElementById("gasChart"),
+  "#ef4444"
+);
+
+// ================= UPDATE CHART =================
+
+function updateChart(chart, value){
+
+  const time = new Date().toLocaleTimeString();
+
+  chart.data.labels.push(time);
+  chart.data.datasets[0].data.push(value);
+
+  if(chart.data.labels.length > 15){
+    chart.data.labels.shift();
+    chart.data.datasets[0].data.shift();
+  }
+
+  chart.update();
+}
+
+// ================= MQTT CONNECT =================
+
+client.on("connect", () => {
+
+  console.log("MQTT Connected");
+
+  document.getElementById("mqttStatus").innerHTML =
+  "ONLINE";
+
+  client.subscribe("smartbuilding/sensor");
+});
+
+// ================= RECEIVE DATA =================
+
+client.on("message", (topic, message) => {
+
+  const data = JSON.parse(message.toString());
+
+  // UPDATE VALUES
+
+  document.getElementById("tempValue")
+  .innerHTML = data.temp + " °C";
+
+  document.getElementById("humValue")
+  .innerHTML = data.hum + " %";
+
+  document.getElementById("gasValue")
+  .innerHTML = data.gas;
+
+  // UPDATE STATUS
+
+  document.getElementById("motionStatus")
+  .innerHTML = data.motion ? "DETECTED" : "NO MOTION";
+
+  document.getElementById("lightStatus")
+  .innerHTML = data.light > 1500
+  ? "DARK"
+  : "BRIGHT";
+
+  // GAS STATUS
+
+  const gasStatus = document.getElementById("gasStatus");
+
+  if(data.gas > 3000){
+
+    gasStatus.innerHTML = "DANGER";
+    gasStatus.className = "status-value danger";
+
+  }else if(data.gas > 1800){
+
+    gasStatus.innerHTML = "WARNING";
+    gasStatus.className = "status-value warning";
+
+  }else{
+
+    gasStatus.innerHTML = "SAFE";
+    gasStatus.className = "status-value safe";
+  }
+
+  // UPDATE CHARTS
+
+  updateChart(tempChart, data.temp);
+  updateChart(humChart, data.hum);
+  updateChart(gasChart, data.gas);
+});
+
+// ================= ERROR =================
+
+client.on("error", (err) => {
+  console.log(err);
+});
+
+</script>
+
+</body>
+</html>

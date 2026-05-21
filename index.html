@@ -9,7 +9,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    /* ================= DESAIN BARU (TEMA PUTIH PROFESIONAL) ================= */
+
     :root {
       --bg-main: #f8fafc;
       --card-bg: #ffffff;
@@ -18,12 +18,17 @@
       --border: #e2e8f0;
     }
 
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       background: var(--bg-main);
       color: var(--text-dark);
-      margin: 0;
-      padding: 20px;
+      padding: 25px;
     }
 
     h1 {
@@ -31,42 +36,43 @@
       margin-bottom: 30px;
       color: #0f172a;
       font-weight: 700;
-      letter-spacing: 0.5px;
+      letter-spacing: 1px;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 20px;
-      max-width: 1200px;
-      margin: 0 auto;
+      max-width: 1400px;
+      margin: auto;
     }
 
     .card {
       background: var(--card-bg);
       padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      border-radius: 18px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
       border: 1px solid var(--border);
     }
 
     .card h3 {
-      margin-top: 0;
       margin-bottom: 15px;
       font-size: 15px;
       color: var(--text-muted);
-      text-transform: uppercase;
       border-bottom: 1px solid var(--border);
       padding-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
     }
 
     .chart-wrapper {
       position: relative;
-      height: 200px;
+      height: 220px;
       width: 100%;
     }
 
-    /* Container untuk Status Sensor */
+    /* STATUS PANEL */
+
     .status-container {
       display: flex;
       flex-direction: column;
@@ -78,8 +84,8 @@
       justify-content: space-between;
       align-items: center;
       background: #f1f5f9;
-      padding: 12px 15px;
-      border-radius: 8px;
+      padding: 14px;
+      border-radius: 10px;
     }
 
     .status-label {
@@ -87,22 +93,41 @@
       color: var(--text-dark);
     }
 
-    /* Styling bawaan lo tetep dipake biar JS nya gak error */
     .status {
       font-size: 14px;
       font-weight: bold;
-      padding: 6px 12px;
+      padding: 8px 14px;
       border-radius: 20px;
+      min-width: 90px;
       text-align: center;
-      min-width: 80px;
-      background: #e2e8f0; /* Default */
+      background: #e2e8f0;
       color: #475569;
     }
 
-    /* Class warna dari JS original lo (diperbagus UI-nya) */
-    .ok { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
-    .warn { background: #fef08a; color: #a16207; border: 1px solid #fde047; }
-    .danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .ok {
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+    }
+
+    .warn {
+      background: #fef08a;
+      color: #a16207;
+      border: 1px solid #fde047;
+    }
+
+    .danger {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+
+    .online {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
   </style>
 </head>
 
@@ -112,55 +137,101 @@
 
 <div class="grid">
 
+  <!-- TEMPERATURE -->
   <div class="card">
     <h3>Temperature (°C)</h3>
+
     <div class="chart-wrapper">
       <canvas id="tempChart"></canvas>
     </div>
   </div>
 
+  <!-- HUMIDITY -->
   <div class="card">
     <h3>Humidity (%)</h3>
+
     <div class="chart-wrapper">
       <canvas id="humChart"></canvas>
     </div>
   </div>
 
+  <!-- GAS -->
   <div class="card">
     <h3>Gas Level</h3>
+
     <div class="chart-wrapper">
       <canvas id="gasChart"></canvas>
     </div>
   </div>
 
+  <!-- LIGHT -->
   <div class="card">
+    <h3>Light Sensor</h3>
+
+    <div class="chart-wrapper">
+      <canvas id="lightChart"></canvas>
+    </div>
+  </div>
+
+  <!-- STATUS -->
+  <div class="card">
+
     <h3>System Status</h3>
-    
+
     <div class="status-container">
+
+      <!-- MQTT -->
+      <div class="status-row">
+        <span class="status-label">MQTT Connection</span>
+        <div id="mqttStatus" class="status">
+          OFFLINE
+        </div>
+      </div>
+
+      <!-- MOTION -->
       <div class="status-row">
         <span class="status-label">Motion Sensor</span>
-        <div id="motion" class="status">--</div>
+        <div id="motion" class="status">
+          --
+        </div>
       </div>
 
+      <!-- LIGHT -->
       <div class="status-row">
         <span class="status-label">Lighting Status</span>
-        <div id="light" class="status">--</div>
+        <div id="light" class="status">
+          --
+        </div>
       </div>
 
+      <!-- ROOM LAMP -->
+      <div class="status-row">
+        <span class="status-label">Room Lamp</span>
+        <div id="lampStatus" class="status">
+          --
+        </div>
+      </div>
+
+      <!-- GAS -->
       <div class="status-row">
         <span class="status-label">Gas Alert</span>
-        <div id="gasText" class="status">--</div>
+        <div id="gasText" class="status">
+          --
+        </div>
       </div>
+
     </div>
+
   </div>
 
 </div>
 
 <script>
 
-// ================= LOGIKA ASLI LO - NO TOUCH! =================
+// ================= MQTT CONFIG =================
 
-const broker = "wss://building-iot-9ee940c9.a03.euc1.aws.hivemq.cloud:8884/mqtt";
+const broker =
+"wss://building-iot-9ee940c9.a03.euc1.aws.hivemq.cloud:8884/mqtt";
 
 const client = mqtt.connect(broker, {
   username: "smartbuilding",
@@ -168,49 +239,101 @@ const client = mqtt.connect(broker, {
 });
 
 // ================= CHART SETUP =================
+
 const maxData = 20;
 
-// Cuma nambahin param 'color' biar grafiknya beda warna, sisanya sama
 function createChart(ctx, label, color) {
+
   return new Chart(ctx, {
+
     type: 'line',
+
     data: {
       labels: [],
       datasets: [{
         label: label,
         data: [],
         borderColor: color,
-        backgroundColor: color + '33', // Efek transparan dikit
+        backgroundColor: color + '33',
         fill: true,
-        tension: 0.3,
-        borderWidth: 2,
+        tension: 0.4,
+        borderWidth: 3,
         pointRadius: 1
       }]
     },
+
     options: {
+
       responsive: true,
-      maintainAspectRatio: false, // Biar pas di dalem card
-      plugins: { legend: { display: false } },
+      maintainAspectRatio: false,
+
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+
       scales: {
-        x: { display: false },
-        y: { border: { display: false } }
+
+        x: {
+          display: false
+        },
+
+        y: {
+          border: {
+            display: false
+          },
+
+          grid: {
+            color: '#e2e8f0'
+          }
+        }
       }
     }
   });
 }
 
-// Injeksi warna doang
-const tempChart = createChart(document.getElementById('tempChart'), 'Temperature', '#ef4444');
-const humChart = createChart(document.getElementById('humChart'), 'Humidity', '#3b82f6');
-const gasChart = createChart(document.getElementById('gasChart'), 'Gas', '#8b5cf6');
+// ================= CHARTS =================
+
+const tempChart =
+createChart(
+  document.getElementById('tempChart'),
+  'Temperature',
+  '#ef4444'
+);
+
+const humChart =
+createChart(
+  document.getElementById('humChart'),
+  'Humidity',
+  '#3b82f6'
+);
+
+const gasChart =
+createChart(
+  document.getElementById('gasChart'),
+  'Gas',
+  '#8b5cf6'
+);
+
+const lightChart =
+createChart(
+  document.getElementById('lightChart'),
+  'Light',
+  '#f59e0b'
+);
+
+// ================= UPDATE CHART =================
 
 function updateChart(chart, value) {
+
   const time = new Date().toLocaleTimeString();
 
   chart.data.labels.push(time);
   chart.data.datasets[0].data.push(value);
 
   if (chart.data.labels.length > maxData) {
+
     chart.data.labels.shift();
     chart.data.datasets[0].data.shift();
   }
@@ -218,46 +341,79 @@ function updateChart(chart, value) {
   chart.update();
 }
 
-// ================= MQTT (PERSIS KODE LO) =================
+// ================= MQTT CONNECT =================
+
 client.on('connect', () => {
+
   console.log('MQTT Connected');
+
+  document.getElementById('mqttStatus')
+  .innerText = 'ONLINE';
+
+  document.getElementById('mqttStatus')
+  .className = 'status online';
+
   client.subscribe('smartbuilding/sensor');
 });
+
+// ================= RECEIVE DATA =================
 
 client.on('message', (topic, message) => {
 
   const data = JSON.parse(message.toString());
 
-  // Charts
+  // ================= UPDATE CHART =================
+
   updateChart(tempChart, data.temp);
+
   updateChart(humChart, data.hum);
+
   updateChart(gasChart, data.gas);
 
-  // Motion
-  document.getElementById('motion').innerText = data.motion ? 'DETECTED' : 'NO MOTION';
+  updateChart(lightChart, data.light);
 
-  // Light
-  document.getElementById('light').innerText = data.light;
+  // ================= MOTION =================
 
-  // Gas status
+  document.getElementById('motion').innerText =
+  data.motion ? 'DETECTED' : 'NO MOTION';
+
+  // ================= LIGHT STATUS =================
+
+  document.getElementById('light').innerText =
+  data.light > 1500 ? 'DARK' : 'BRIGHT';
+
+  // ================= ROOM LAMP =================
+
+  document.getElementById('lampStatus').innerText =
+  data.light > 1500 ? 'ON' : 'OFF';
+
+  // ================= GAS STATUS =================
+
   let gasText = 'SAFE';
   let gasClass = 'ok';
 
   if (data.gas > 3000) {
+
     gasText = 'DANGER';
     gasClass = 'danger';
+
   } else if (data.gas > 1800) {
+
     gasText = 'WARNING';
     gasClass = 'warn';
   }
 
   const gasEl = document.getElementById('gasText');
-  gasEl.innerText = gasText;
-  gasEl.className = 'status ' + gasClass;
 
+  gasEl.innerText = gasText;
+
+  gasEl.className = 'status ' + gasClass;
 });
 
+// ================= ERROR =================
+
 client.on('error', (err) => {
+
   console.log('MQTT Error:', err);
 });
 
