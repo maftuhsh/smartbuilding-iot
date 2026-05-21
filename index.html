@@ -9,52 +9,31 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    /* Global Styles */
+    /* ================= DESAIN BARU (TEMA PUTIH PROFESIONAL) ================= */
     :root {
-      --bg-body: #f1f5f9;
-      --bg-card: #ffffff;
-      --text-main: #1e293b;
+      --bg-main: #f8fafc;
+      --card-bg: #ffffff;
+      --text-dark: #1e293b;
       --text-muted: #64748b;
-      --border-color: #e2e8f0;
-      
-      /* Chart Colors */
-      --color-temp: #ef4444; /* Red */
-      --color-hum: #3b82f6;  /* Blue */
-      --color-gas: #8b5cf6;  /* Purple */
+      --border: #e2e8f0;
     }
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: var(--bg-body);
-      color: var(--text-main);
+      background: var(--bg-main);
+      color: var(--text-dark);
       margin: 0;
       padding: 20px;
-      line-height: 1.5;
     }
 
-    /* Header */
-    .header {
+    h1 {
       text-align: center;
       margin-bottom: 30px;
-      padding-bottom: 15px;
-      border-bottom: 2px solid var(--border-color);
-    }
-
-    .header h1 {
-      margin: 0;
-      font-size: 28px;
+      color: #0f172a;
       font-weight: 700;
-      color: var(--text-main);
       letter-spacing: 0.5px;
     }
 
-    .header p {
-      margin: 5px 0 0 0;
-      color: var(--text-muted);
-      font-size: 14px;
-    }
-
-    /* Layout Grid */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -63,126 +42,114 @@
       margin: 0 auto;
     }
 
-    /* Card Design */
     .card {
-      background: var(--bg-card);
+      background: var(--card-bg);
       padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-      border: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border);
     }
 
     .card h3 {
       margin-top: 0;
       margin-bottom: 15px;
-      font-size: 16px;
+      font-size: 15px;
       color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 1px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
     }
 
-    /* Chart Container */
-    .chart-container {
+    .chart-wrapper {
       position: relative;
       height: 200px;
       width: 100%;
     }
 
-    /* Status Items */
-    .status-list {
+    /* Container untuk Status Sensor */
+    .status-container {
       display: flex;
       flex-direction: column;
       gap: 15px;
-      margin-top: 5px;
     }
 
-    .status-item {
+    .status-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      background: #f1f5f9;
       padding: 12px 15px;
-      background: var(--bg-body);
-      border-radius: 10px;
-      border: 1px solid var(--border-color);
+      border-radius: 8px;
     }
 
     .status-label {
       font-weight: 600;
-      color: var(--text-main);
+      color: var(--text-dark);
     }
 
-    /* Badges */
-    .badge {
+    /* Styling bawaan lo tetep dipake biar JS nya gak error */
+    .status {
+      font-size: 14px;
+      font-weight: bold;
       padding: 6px 12px;
       border-radius: 20px;
-      font-size: 13px;
-      font-weight: 700;
       text-align: center;
       min-width: 80px;
+      background: #e2e8f0; /* Default */
+      color: #475569;
     }
 
-    .badge-default { background: #e2e8f0; color: #475569; }
-    .badge-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-    .badge-warning { background: #fef08a; color: #854d0e; border: 1px solid #fde047; }
-    .badge-danger  { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-    .badge-active  { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
-
+    /* Class warna dari JS original lo (diperbagus UI-nya) */
+    .ok { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .warn { background: #fef08a; color: #a16207; border: 1px solid #fde047; }
+    .danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
   </style>
 </head>
 
 <body>
 
-<div class="header">
-  <h1>Smart Building Dashboard</h1>
-  <p>Real-time Environment & Security Monitoring</p>
-</div>
+<h1>SMART BUILDING DASHBOARD</h1>
 
 <div class="grid">
 
   <div class="card">
-    <h3>Temperature <span style="font-size: 20px;">🌡️</span></h3>
-    <div class="chart-container">
+    <h3>Temperature (°C)</h3>
+    <div class="chart-wrapper">
       <canvas id="tempChart"></canvas>
     </div>
   </div>
 
   <div class="card">
-    <h3>Humidity <span style="font-size: 20px;">💧</span></h3>
-    <div class="chart-container">
+    <h3>Humidity (%)</h3>
+    <div class="chart-wrapper">
       <canvas id="humChart"></canvas>
     </div>
   </div>
 
   <div class="card">
-    <h3>Gas Level <span style="font-size: 20px;">☁️</span></h3>
-    <div class="chart-container">
+    <h3>Gas Level</h3>
+    <div class="chart-wrapper">
       <canvas id="gasChart"></canvas>
     </div>
   </div>
 
   <div class="card">
-    <h3>System Status <span style="font-size: 20px;">⚙️</span></h3>
+    <h3>System Status</h3>
     
-    <div class="status-list">
-      <div class="status-item">
+    <div class="status-container">
+      <div class="status-row">
         <span class="status-label">Motion Sensor</span>
-        <div id="motion" class="badge badge-default">WAITING...</div>
+        <div id="motion" class="status">--</div>
       </div>
 
-      <div class="status-item">
-        <span class="status-label">Lighting System</span>
-        <div id="light" class="badge badge-default">WAITING...</div>
+      <div class="status-row">
+        <span class="status-label">Lighting Status</span>
+        <div id="light" class="status">--</div>
       </div>
 
-      <div class="status-item">
+      <div class="status-row">
         <span class="status-label">Gas Alert</span>
-        <div id="gasText" class="badge badge-default">WAITING...</div>
+        <div id="gasText" class="status">--</div>
       </div>
     </div>
   </div>
@@ -190,7 +157,8 @@
 </div>
 
 <script>
-// ================= MQTT CONFIG =================
+
+// ================= LOGIKA ASLI LO - NO TOUCH! =================
 
 const broker = "wss://building-iot-9ee940c9.a03.euc1.aws.hivemq.cloud:8884/mqtt";
 
@@ -202,8 +170,8 @@ const client = mqtt.connect(broker, {
 // ================= CHART SETUP =================
 const maxData = 20;
 
-// Update: Menambahkan warna khusus untuk setiap chart agar lebih profesional
-function createChart(ctx, label, colorHex) {
+// Cuma nambahin param 'color' biar grafiknya beda warna, sisanya sama
+function createChart(ctx, label, color) {
   return new Chart(ctx, {
     type: 'line',
     data: {
@@ -211,38 +179,30 @@ function createChart(ctx, label, colorHex) {
       datasets: [{
         label: label,
         data: [],
-        borderColor: colorHex,
-        backgroundColor: colorHex + '33', // Menambahkan efek transparansi untuk fill (Hex + Alpha)
-        borderWidth: 2,
-        pointRadius: 2,
-        pointBackgroundColor: colorHex,
+        borderColor: color,
+        backgroundColor: color + '33', // Efek transparan dikit
         fill: true,
-        tension: 0.4 // Membuat garis melengkung halus (smooth curve)
+        tension: 0.3,
+        borderWidth: 2,
+        pointRadius: 1
       }]
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false } // Menyembunyikan legend bawaan agar lebih bersih
-      },
+      maintainAspectRatio: false, // Biar pas di dalem card
+      plugins: { legend: { display: false } },
       scales: {
-        x: { 
-          display: false 
-        },
-        y: { 
-          border: { display: false },
-          grid: { color: '#f1f5f9' } // Garis background tipis
-        }
+        x: { display: false },
+        y: { border: { display: false } }
       }
     }
   });
 }
 
-// Inisialisasi chart dengan warna spesifik (Merah, Biru, Ungu)
-const tempChart = createChart(document.getElementById('tempChart'), 'Temperature (°C)', '#ef4444');
-const humChart = createChart(document.getElementById('humChart'), 'Humidity (%)', '#3b82f6');
-const gasChart = createChart(document.getElementById('gasChart'), 'Gas Level', '#8b5cf6');
+// Injeksi warna doang
+const tempChart = createChart(document.getElementById('tempChart'), 'Temperature', '#ef4444');
+const humChart = createChart(document.getElementById('humChart'), 'Humidity', '#3b82f6');
+const gasChart = createChart(document.getElementById('gasChart'), 'Gas', '#8b5cf6');
 
 function updateChart(chart, value) {
   const time = new Date().toLocaleTimeString();
@@ -258,7 +218,7 @@ function updateChart(chart, value) {
   chart.update();
 }
 
-// ================= MQTT LOGIC =================
+// ================= MQTT (PERSIS KODE LO) =================
 client.on('connect', () => {
   console.log('MQTT Connected');
   client.subscribe('smartbuilding/sensor');
@@ -268,47 +228,39 @@ client.on('message', (topic, message) => {
 
   const data = JSON.parse(message.toString());
 
-  // Update Charts
+  // Charts
   updateChart(tempChart, data.temp);
   updateChart(humChart, data.hum);
   updateChart(gasChart, data.gas);
 
-  // Update Motion UI
-  const motionEl = document.getElementById('motion');
-  if (data.motion) {
-    motionEl.innerText = 'DETECTED';
-    motionEl.className = 'badge badge-danger';
-  } else {
-    motionEl.innerText = 'CLEAR';
-    motionEl.className = 'badge badge-success';
-  }
+  // Motion
+  document.getElementById('motion').innerText = data.motion ? 'DETECTED' : 'NO MOTION';
 
-  // Update Light UI
-  const lightEl = document.getElementById('light');
-  lightEl.innerText = data.light.toUpperCase();
-  lightEl.className = data.light.toLowerCase() === 'on' ? 'badge badge-active' : 'badge badge-default';
+  // Light
+  document.getElementById('light').innerText = data.light;
 
-  // Update Gas Status UI
+  // Gas status
   let gasText = 'SAFE';
-  let gasClass = 'badge-success';
+  let gasClass = 'ok';
 
   if (data.gas > 3000) {
     gasText = 'DANGER';
-    gasClass = 'badge-danger';
+    gasClass = 'danger';
   } else if (data.gas > 1800) {
     gasText = 'WARNING';
-    gasClass = 'badge-warning';
+    gasClass = 'warn';
   }
 
   const gasEl = document.getElementById('gasText');
   gasEl.innerText = gasText;
-  gasEl.className = 'badge ' + gasClass;
+  gasEl.className = 'status ' + gasClass;
 
 });
 
 client.on('error', (err) => {
   console.log('MQTT Error:', err);
 });
+
 </script>
 
 </body>
