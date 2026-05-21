@@ -5,88 +5,193 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>IoT Smart Building Dashboard</title>
 
-  <!-- MQTT + Chart.js -->
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
+    /* Global Styles */
+    :root {
+      --bg-body: #f1f5f9;
+      --bg-card: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      
+      /* Chart Colors */
+      --color-temp: #ef4444; /* Red */
+      --color-hum: #3b82f6;  /* Blue */
+      --color-gas: #8b5cf6;  /* Purple */
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg-body);
+      color: var(--text-main);
       margin: 0;
       padding: 20px;
+      line-height: 1.5;
     }
 
-    h1 {
+    /* Header */
+    .header {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--border-color);
     }
 
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: 0.5px;
+    }
+
+    .header p {
+      margin: 5px 0 0 0;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Layout Grid */
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 15px;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
+    /* Card Design */
     .card {
-      background: #1e293b;
-      padding: 15px;
-      border-radius: 12px;
+      background: var(--bg-card);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
     }
 
-    canvas {
-      max-height: 200px;
+    .card h3 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 16px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
-    .status {
-      font-size: 18px;
-      margin-top: 10px;
+    /* Chart Container */
+    .chart-container {
+      position: relative;
+      height: 200px;
+      width: 100%;
     }
 
-    .ok { color: #22c55e; }
-    .warn { color: #f59e0b; }
-    .danger { color: #ef4444; }
+    /* Status Items */
+    .status-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 5px;
+    }
+
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 15px;
+      background: var(--bg-body);
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+    }
+
+    .status-label {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    /* Badges */
+    .badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+      min-width: 80px;
+    }
+
+    .badge-default { background: #e2e8f0; color: #475569; }
+    .badge-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .badge-warning { background: #fef08a; color: #854d0e; border: 1px solid #fde047; }
+    .badge-danger  { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    .badge-active  { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+
   </style>
 </head>
 
 <body>
 
-<h1>SMART BUILDING DASHBOARD</h1>
+<div class="header">
+  <h1>Smart Building Dashboard</h1>
+  <p>Real-time Environment & Security Monitoring</p>
+</div>
 
 <div class="grid">
 
   <div class="card">
-    <h3>Temperature (°C)</h3>
-    <canvas id="tempChart"></canvas>
+    <h3>Temperature <span style="font-size: 20px;">🌡️</span></h3>
+    <div class="chart-container">
+      <canvas id="tempChart"></canvas>
+    </div>
   </div>
 
   <div class="card">
-    <h3>Humidity (%)</h3>
-    <canvas id="humChart"></canvas>
+    <h3>Humidity <span style="font-size: 20px;">💧</span></h3>
+    <div class="chart-container">
+      <canvas id="humChart"></canvas>
+    </div>
   </div>
 
   <div class="card">
-    <h3>Gas Level</h3>
-    <canvas id="gasChart"></canvas>
+    <h3>Gas Level <span style="font-size: 20px;">☁️</span></h3>
+    <div class="chart-container">
+      <canvas id="gasChart"></canvas>
+    </div>
   </div>
 
   <div class="card">
-    <h3>Motion Status</h3>
-    <div id="motion" class="status">--</div>
+    <h3>System Status <span style="font-size: 20px;">⚙️</span></h3>
+    
+    <div class="status-list">
+      <div class="status-item">
+        <span class="status-label">Motion Sensor</span>
+        <div id="motion" class="badge badge-default">WAITING...</div>
+      </div>
 
-    <h3>Light Status</h3>
-    <div id="light" class="status">--</div>
+      <div class="status-item">
+        <span class="status-label">Lighting System</span>
+        <div id="light" class="badge badge-default">WAITING...</div>
+      </div>
 
-    <h3>Gas Alert</h3>
-    <div id="gasText" class="status">--</div>
+      <div class="status-item">
+        <span class="status-label">Gas Alert</span>
+        <div id="gasText" class="badge badge-default">WAITING...</div>
+      </div>
+    </div>
   </div>
 
 </div>
 
 <script>
-
 // ================= MQTT CONFIG =================
+
 const broker = "wss://building-iot-9ee940c9.a03.euc1.aws.hivemq.cloud:8884/mqtt";
 
 const client = mqtt.connect(broker, {
@@ -97,7 +202,8 @@ const client = mqtt.connect(broker, {
 // ================= CHART SETUP =================
 const maxData = 20;
 
-function createChart(ctx, label) {
+// Update: Menambahkan warna khusus untuk setiap chart agar lebih profesional
+function createChart(ctx, label, colorHex) {
   return new Chart(ctx, {
     type: 'line',
     data: {
@@ -105,22 +211,38 @@ function createChart(ctx, label) {
       datasets: [{
         label: label,
         data: [],
-        borderColor: '#38bdf8',
-        fill: false
+        borderColor: colorHex,
+        backgroundColor: colorHex + '33', // Menambahkan efek transparansi untuk fill (Hex + Alpha)
+        borderWidth: 2,
+        pointRadius: 2,
+        pointBackgroundColor: colorHex,
+        fill: true,
+        tension: 0.4 // Membuat garis melengkung halus (smooth curve)
       }]
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false } // Menyembunyikan legend bawaan agar lebih bersih
+      },
       scales: {
-        x: { display: false }
+        x: { 
+          display: false 
+        },
+        y: { 
+          border: { display: false },
+          grid: { color: '#f1f5f9' } // Garis background tipis
+        }
       }
     }
   });
 }
 
-const tempChart = createChart(document.getElementById('tempChart'), 'Temperature');
-const humChart = createChart(document.getElementById('humChart'), 'Humidity');
-const gasChart = createChart(document.getElementById('gasChart'), 'Gas');
+// Inisialisasi chart dengan warna spesifik (Merah, Biru, Ungu)
+const tempChart = createChart(document.getElementById('tempChart'), 'Temperature (°C)', '#ef4444');
+const humChart = createChart(document.getElementById('humChart'), 'Humidity (%)', '#3b82f6');
+const gasChart = createChart(document.getElementById('gasChart'), 'Gas Level', '#8b5cf6');
 
 function updateChart(chart, value) {
   const time = new Date().toLocaleTimeString();
@@ -136,7 +258,7 @@ function updateChart(chart, value) {
   chart.update();
 }
 
-// ================= MQTT =================
+// ================= MQTT LOGIC =================
 client.on('connect', () => {
   console.log('MQTT Connected');
   client.subscribe('smartbuilding/sensor');
@@ -146,39 +268,47 @@ client.on('message', (topic, message) => {
 
   const data = JSON.parse(message.toString());
 
-  // Charts
+  // Update Charts
   updateChart(tempChart, data.temp);
   updateChart(humChart, data.hum);
   updateChart(gasChart, data.gas);
 
-  // Motion
-  document.getElementById('motion').innerText = data.motion ? 'DETECTED' : 'NO MOTION';
+  // Update Motion UI
+  const motionEl = document.getElementById('motion');
+  if (data.motion) {
+    motionEl.innerText = 'DETECTED';
+    motionEl.className = 'badge badge-danger';
+  } else {
+    motionEl.innerText = 'CLEAR';
+    motionEl.className = 'badge badge-success';
+  }
 
-  // Light
-  document.getElementById('light').innerText = data.light;
+  // Update Light UI
+  const lightEl = document.getElementById('light');
+  lightEl.innerText = data.light.toUpperCase();
+  lightEl.className = data.light.toLowerCase() === 'on' ? 'badge badge-active' : 'badge badge-default';
 
-  // Gas status
+  // Update Gas Status UI
   let gasText = 'SAFE';
-  let gasClass = 'ok';
+  let gasClass = 'badge-success';
 
   if (data.gas > 3000) {
     gasText = 'DANGER';
-    gasClass = 'danger';
+    gasClass = 'badge-danger';
   } else if (data.gas > 1800) {
     gasText = 'WARNING';
-    gasClass = 'warn';
+    gasClass = 'badge-warning';
   }
 
   const gasEl = document.getElementById('gasText');
   gasEl.innerText = gasText;
-  gasEl.className = 'status ' + gasClass;
+  gasEl.className = 'badge ' + gasClass;
 
 });
 
 client.on('error', (err) => {
   console.log('MQTT Error:', err);
 });
-
 </script>
 
 </body>
